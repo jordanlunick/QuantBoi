@@ -8,11 +8,15 @@ class OptionType:
     description: str
 
 CALL = OptionType(
-    int_value=1, str_values=['C', 'Call'], description='Call Option'
+    int_value=1, 
+    str_values=['C', 'Call'], 
+    description='Call Option'
 )
 
 PUT = OptionType(
-    int_value=-1, str_values=['P', 'Put'], description='Put Option'
+    int_value=-1, 
+    str_values=['P', 'Put'], 
+    description='Put Option'
 )
 
 

@@ -7,35 +7,43 @@ class SecurityType:
     description: str
 
 STOCK = SecurityType(
-    value='STK', description='Stock'
+    value='STK', 
+    description='Stock'
 )
 
 OPTION = SecurityType(
-    value='OPT', description='Option'
+    value='OPT', 
+    description='Option'
 )
 
 FUTURE = SecurityType(
-    value='FUT', description='Future'
+    value='FUT', 
+    description='Future'
 )
 
 CASH = SecurityType(
-    value='CASH', description='Cash'
+    value='CASH', 
+    description='Cash'
 )
 
 BOND = SecurityType(
-    value='BOND', description='Bond'
+    value='BOND', 
+    description='Bond'
 )
 
 COMMODITY = SecurityType(
-    value='CMDTY', description='Commodity'
+    value='CMDTY', 
+    description='Commodity'
 )
 
 INDEX = SecurityType(
-    value='IND', description='Index'
+    value='IND', 
+    description='Index'
 )
 
 FOP = SecurityType(
-    value='FOP', description='Future Option'
+    value='FOP', 
+    description='Future Option'
 )
 
 
