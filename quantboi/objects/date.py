@@ -3,7 +3,12 @@ import datetime as dt
 import QuantLib as ql
 from typing import Optional
 
-    
+
+
+DATE_FORMAT = "%Y-%m-%d"
+
+
+
 @dataclass
 class Date:
     """
@@ -35,7 +40,7 @@ class Date:
     month: Optional[int] = field(default=None)
     day: Optional[int] = field(default=None)
     date_string: Optional[str] = field(default=None)
-    date_format: Optional[str] = field(default=None)
+    date_format: Optional[str] = field(default=DATE_FORMAT)
     serial_number: Optional[int] = field(default=None)
 
     # /// Date Objects ///
@@ -43,6 +48,19 @@ class Date:
     dt_date: Optional[dt.datetime] = field(default=None)
     ql_date: Optional[ql.Date] = field(default=None)
 
+
+    def __getstate__(self) -> object:
+        state = self.__dict__.copy()
+        state['ql_date'] = None
+        return state
+    
+    def __setstate__(self, state: dict) -> None:
+        # Restore the state
+        self.__dict__.update(state)
+        # Reinitialize or set non-picklable parts
+        if self.ql_date is None and self.day and self.month and self.year:
+            self.ql_date = ql.Date(self.day, self.month, self.year)
+    
     def to_dt(self) -> dt.datetime:
         if self.dt_date is None:
             self.dt_date = dt.datetime(self.year, self.month, self.day)
@@ -51,6 +69,7 @@ class Date:
     def to_ql(self) -> ql.Date:
         if self.ql_date is None:
             if self.day and self.month and self.year:
+                #self.ql_date = QlDate(self.day, self.month, self.year)
                 self.ql_date = ql.Date(self.day, self.month, self.year)
         return self.ql_date
     

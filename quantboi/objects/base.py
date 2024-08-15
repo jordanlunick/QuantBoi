@@ -1,4 +1,4 @@
-from date import Date
+from .date import Date
 
 
 # /// Library Imports /// #
@@ -13,7 +13,6 @@ import pickle
 
 import ib_insync
 import unittest
-
 
 # /// Enum Classes /// #
 class OptionType(Enum):
@@ -190,19 +189,23 @@ class Exercise:
         return f"Exercise(exercise_type={self.exercise_type})"
 
 
-test = Quote(100)
-
-pickle.dumps(test)
 
 #test_date = Date(year=2024, month=8, day=14)
 
-#option_type = OptionType.CALL
-#strike_price = 100.0
-#payoff = Payoff(option_type=option_type, strike_price=strike_price)
+option_type = OptionType.CALL
+strike_price = 100.0
+payoff = Payoff(option_type=option_type, strike_price=strike_price)
 
-#exercise_type = ExerciseType.EUROPEAN
-#exercise_date = Date(year=2024, month=8, day=14)
-#exercise = Exercise(exercise_type=exercise_type, exercise_date=exercise_date)
+exercise_type = ExerciseType.EUROPEAN
+exercise_date = Date(year=2024, month=8, day=14)
 
-#pickle.dumps(test_date)
+exercise = Exercise(exercise_type=exercise_type, exercise_date=exercise_date)
+
+option = VanillaOption(payoff=payoff.payoff, exercise=exercise.exercise)
+
+#pickle.dumps(exercise_type)
+#pickle.dumps(exercise_date)
+#pickle.dumps(exercise)
+
+
 #pickle.dumps(exercise_date)

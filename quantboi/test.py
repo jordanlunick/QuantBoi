@@ -1,7 +1,7 @@
 
 from objects import (
-    Contract, Stock, Option, 
-    Date, Quote, OptionType)
+    BaseContract, StockContract, OptionContract, 
+    Date, Quote, OptType)
 import QuantLib as ql
 
 # Setup the environment
@@ -12,12 +12,12 @@ ql.Settings.instance().evaluationDate = calculation_date
 
 # Initialize stock object and set quote
 spot_price = 100.0
-stock = Stock(
+stock = StockContract(
     symbol='AAPL', exchange='NASDAQ', currency='USD')
 stock.set_ql_quote(value=spot_price)
 
 # Initialize option object and set handle to stock quote
-option = Option(
+option = OptionContract(
     stock=stock, option_type=1, strike_price=145.0, 
     exercise_date=Date(year=2025, month=7, day=16), 
     multiplier='100')
