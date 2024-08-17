@@ -1,3 +1,14 @@
-import config
+# /// Project Path: QuantBoi/quantboi/_test.py /// #
 
-print(config.ROOT_DIR)
+
+
+
+#import config
+#print('Import was successful!')
+
+import quantboi.config
+print('Import was successful!')
+
+
+from ..quantboi import config
+print('Import was successful!')

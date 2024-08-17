@@ -1,4 +1,4 @@
-import quantboi as qb
+from quantboi.core.data_management import TEST_DATASET
 
-print('yay it worked')
-qb.config.INPUT_DIR
+print(TEST_DATASET)
+
