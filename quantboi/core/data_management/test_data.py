@@ -23,10 +23,27 @@ class MarketBook:
     ask_size: int
 
 @dataclass
+class MarketData:
+    observation_date: dt.datetime
+    #symbol: str
+    #ohlcv: OHLCV
+    open_price: float
+    high_price: float
+    low_price: float
+    close_price: float
+    volume: int
+
+    #market_book: MarketBook
+    bid_price: float
+    bid_size: int
+    ask_price: float
+    ask_size: int
+
+@dataclass
 class Symbol:
     security_type: str
     symbol: str
-    symbol_underlying: str = None
+    symbol_underlying: Optional[str] = field(default=None)
 
 @dataclass
 class Stock:
@@ -42,51 +59,48 @@ class Option:
     strike: float
 
 @dataclass
-class TestDataStructure:
-    observation_date: dt.datetime
+class TestDataObject:
     symbol: Symbol
-    instrument: Union[Stock, Option]
-    ohlcv: OHLCV
-    market_book: MarketBook
+    instrument: Optional[Union[Stock, Option]] = field(default=None)
+    market_data: Optional[list[MarketData]] = field(default=None)
 
 
 def read_test_data(test_type: str = 'sample') -> pd.DataFrame:
-    from quantboi.core.data import Data
-    data = Data()
+    from quantboi.core.data_management import Reader
+    reader = Reader()
     
     if test_type == 'sample':
-        test_data = data.reader.load_test_sample()
+        test_data = reader.load_test_sample()
     elif test_type == 'dataset':
-        test_data = data.reader.load_test_dataset()
+        test_data = reader.load_test_dataset()
     
     return test_data
 
-def create_test_data_structure(
-        observation_date: dt.datetime, symbol: Symbol, 
+def create_test_data_object(
+        symbol: Symbol, 
         instrument: Union[Stock, Option], 
-        ohlcv: OHLCV, market_book: MarketBook
-        ) -> TestDataStructure:
+        market_data: MarketData
+        ) -> TestDataObject:
     
-    return TestDataStructure(
-        observation_date=observation_date,
+    return TestDataObject(
         symbol=symbol,
         instrument=instrument,
-        ohlcv=ohlcv,
-        market_book=market_book
+        market_data=market_data
     )
 
-def load_test_data(test_type: str = 'dataset') -> dict:
+
+def load_test_data(test_type: str = 'sample') -> dict:
     df = read_test_data(test_type=test_type)
     test_data = {
         'stock': [],
         'option': []
     }
+    length = len(df)
+    print(f'Processing test data for {length} securities')
+    row_num = 0
     for i in range(len(df)):
         row = df.iloc[i]
-        
-        # Determine observation date
-        observation_date = row['Date']
-        
+                
         # Determine security type
         if row['Ins. Type'] == 3:
             security_type = 'Stock'
@@ -94,6 +108,7 @@ def load_test_data(test_type: str = 'dataset') -> dict:
             security_type = 'Option'
         else:
             raise ValueError('Invalid security type')
+
         # Determine symbol and underlying symbol
         symbol = row['Symbol']
         symbol_underlying = row['Underlying Symbol']
@@ -107,7 +122,6 @@ def load_test_data(test_type: str = 'dataset') -> dict:
         # Create instrument object
         if symbol.security_type == 'Stock':
             instrument = Stock(
-                #dividend_yield=row['dividend_yield'], no dividend info
                 dividend_yield=0,
                 price=row['Last Price'],
                 volatility=row['Implied Volatility']
@@ -116,12 +130,7 @@ def load_test_data(test_type: str = 'dataset') -> dict:
             instrument = Option(
                 expiry_date=row['Expiry Date'],
                 implied_volatility=row['Implied Volatility'],
-                
-                # if row['Call/Put'] == 0:
-                #     right = 'Call'
-                # elif row['Call/Put'] == 1:
-                #     right = 'Put'
-                right = 'Call' if row['Call/Put'] == 0 else 'Put',
+                right='Call' if row['Call/Put'] == 0 else 'Put',
                 strike=row['Strike Price']
             )
         else:
@@ -141,22 +150,50 @@ def load_test_data(test_type: str = 'dataset') -> dict:
             ask_price=row['Ask Price'],
             ask_size=row['Ask Size']
         )
-        # Create TestDataStructure object
-        security = create_test_data_structure(
+        
+        # Create MarketData object
+        observation_date = row['Date']
+        market_data = MarketData(
             observation_date=observation_date,
-            symbol=symbol,
-            instrument=instrument,
             ohlcv=ohlcv,
             market_book=market_book
         )
 
-        # Append to test_data dictionary based on security type
-        if symbol.security_type == 'Stock':
-            test_data['stock'].append(security)
-        elif symbol.security_type == 'Option':
-            test_data['option'].append(security)
+        # Check if symbol already exists in test_data
+        if symbol.symbol in [s.symbol for s in test_data[symbol.security_type.lower()]]:
+            # Find the existing object and append market_data
+            for obj in test_data[symbol.security_type.lower()]:
+                if obj.symbol.symbol == symbol.symbol:
+                    obj.market_data.append(market_data)
+                    break
         else:
-            raise ValueError('Invalid security type')
-    
+            # Create TestDataObject object
+            security = create_test_data_object(
+                symbol=symbol,
+                instrument=instrument,
+                market_data=[market_data]  # Wrap market_data in a list
+            )
+
+            # Append to test_data dictionary based on security type
+            if symbol.security_type == 'Stock':
+                test_data['stock'].append(security)
+            elif symbol.security_type == 'Option':
+                test_data['option'].append(security)
+            else:
+                raise ValueError('Invalid security type')
+        
+        row_num += 1
+        print(f'Processed {row_num} of {length} securities - {symbol.symbol} - {symbol.security_type}')
+        
     return test_data
+
+df = read_test_data(test_type='dataset')
+
+
+
+# Find list of unique symbols
+symbol_list = df['Symbol'].unique()
+symbol_dict = {}
+for symbol in symbol_list:
+    symbol_dict[symbol] = df[df['Symbol'] == symbol]
 
