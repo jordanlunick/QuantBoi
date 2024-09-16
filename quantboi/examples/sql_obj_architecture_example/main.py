@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from ib_async import IB, util, Stock, BarDataList
 from typing import List
 import asyncio
-
+import ib_api
 # Database Setup
 Base = declarative_base()
 

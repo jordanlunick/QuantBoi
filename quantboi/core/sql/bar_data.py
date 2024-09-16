@@ -104,7 +104,7 @@ class HistoricalBarData(Base):
 
 # Fetch historical data from IB
 contract, historical_data = get_historical_data()
-commit_hist_data_to_db(contract, historical_data)
+#commit_hist_data_to_db(contract, historical_data)
 
 
 # Insert the historical data into the database

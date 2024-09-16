@@ -1,0 +1,103 @@
+Option 1: Modular Event-Driven Architecture (Pub-Sub)
+This structure follows a modular design where each component (data handling, strategy, and trade execution) 
+is kept in its own module. Redis or another event bus is used for communication between these components.
+
+/modular_event_driven_trading/
+├── event_bus/
+│   ├── __init__.py
+│   └── redis_event_bus.py   # Handles Redis-based Pub-Sub communication
+├── market_data/
+│   ├── __init__.py
+│   ├── ibkr_handler.py      # Handles IBKR API connection and data streaming
+│   └── market_data_model.py # Dataclass for market data structure
+├── strategy/
+│   ├── __init__.py
+│   ├── strategy.py          # Logic to generate trade signals based on market data
+│   └── trade_signal_model.py # Dataclass for trade signal structure
+├── execution/
+│   ├── __init__.py
+│   ├── order_executor.py    # Logic to place orders through IBKR API
+├── storage/
+│   ├── __init__.py
+│   └── sqlalchemy_storage.py # SQLAlchemy integration for data persistence
+├── main.py                  # Entry point to start the event-driven system
+├── config.py                # Configuration file for API keys, Redis setup, DB connection
+├── requirements.txt         # List of dependencies (ib_async, SQLAlchemy, Redis, etc.)
+└── README.md                # Project documentation
+
+Explanation:
+event_bus/: Contains logic for the Pub-Sub communication, such as Redis or ZeroMQ handlers.
+market_data/: Manages data from the IBKR API and structures it using dataclasses.
+strategy/: Handles the strategy logic and uses dataclasses to manage trade signals.
+execution/: Handles the trade execution process with IBKR.
+storage/: Manages the database layer for logging market data or trades.
+main.py: The entry point that initializes all modules and starts the event loop.
+
+
+Option 2: Monolithic Event-Driven Architecture
+In this directory structure, all components (data handling, strategy, and execution) are managed in a single 
+event loop. It's a simpler setup with the asyncio event loop handling asynchronous operations internally.
+/monolithic_event_driven_trading/
+├── trading_system/
+│   ├── __init__.py
+│   ├── market_data.py       # Market data handling and dataclasses
+│   ├── strategy.py          # Strategy logic to generate trade signals
+│   ├── execution.py         # Handles trade execution via IBKR API
+│   └── models.py            # Dataclasses for MarketData, TradeSignal
+├── config.py                # Configuration for APIs, DB connection, etc.
+├── main.py                  # Entry point with asyncio event loop managing the system
+├── requirements.txt         # Dependencies (ib_async, SQLAlchemy, etc.)
+└── README.md                # Project documentation
+
+Explanation:
+trading_system/: All core components (data handling, strategy, execution) are within this folder. Dataclasses 
+	(defined in models.py) are shared across modules.
+market_data.py: Handles market data ingestion using ib_async.
+strategy.py: Implements the trading strategy and generates signals.
+execution.py: Executes orders based on signals via IBKR.
+main.py: The entry point to run the system using asyncio.
+
+
+Option 3: Microservice-Based Event-Driven Architecture
+This directory structure reflects a microservices approach, where each service (market data, strategy, execution) 
+is an independent component, potentially running in its own container. Kafka or RabbitMQ is used for messaging between services.
+
+/microservice_event_driven_trading/
+├── services/
+│   ├── market_data_service/
+│   │   ├── Dockerfile
+│   │   ├── main.py               # Starts the service and listens for market data
+│   │   ├── ibkr_handler.py        # Fetches market data from IBKR API
+│   │   └── models.py              # Dataclasses for MarketData
+│   ├── strategy_service/
+│   │   ├── Dockerfile
+│   │   ├── main.py               # Consumes market data and generates trade signals
+│   │   ├── strategy.py           # Strategy logic
+│   │   └── models.py             # Dataclasses for TradeSignal
+│   ├── execution_service/
+│   │   ├── Dockerfile
+│   │   ├── main.py               # Executes trades based on signals
+│   │   └── order_executor.py     # Logic to place trades with IBKR API
+│   └── storage_service/
+│       ├── Dockerfile
+│       ├── main.py               # Handles data persistence (market data, trade logs)
+│       └── sqlalchemy_storage.py # SQLAlchemy integration
+├── messaging/
+│   ├── kafka/
+│   │   ├── kafka_config.py        # Configuration and setup for Kafka
+│   └── rabbitmq/
+│       ├── rabbitmq_config.py     # Configuration and setup for RabbitMQ
+├── config/
+│   ├── config.py                 # Shared configuration for APIs, database, messaging
+├── docker-compose.yml            # Docker orchestration for services and message queues
+├── requirements.txt              # Shared dependencies
+└── README.md                     # Project documentation
+
+Explanation:
+
+services/: Each folder under services/ represents a microservice. For example, the market_data_service/ is responsible for 
+	fetching market data, while strategy_service/ handles strategy logic, and execution_service/ manages trade execution.
+messaging/: Manages Kafka or RabbitMQ configuration, ensuring services can communicate asynchronously.
+Dockerfiles: Each service is containerized, and docker-compose.yml is used for orchestrating the services together.
+main.py: Each service has its own main.py script that initiates the service and listens for events.
+models.py: Each service maintains its own dataclass definitions to ensure consistent data structure between components.
