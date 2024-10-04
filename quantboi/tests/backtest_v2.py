@@ -23,8 +23,8 @@ def get_historical_data():
     ib.sleep(1)
     
     historical_data: BarDataList = ib.reqHistoricalData(
-        contract, endDateTime='', durationStr='20 D',
-        barSizeSetting='1 hour', whatToShow='TRADES', useRTH=True)
+        contract, endDateTime='', durationStr='10 Y',
+        barSizeSetting='1 day', whatToShow='TRADES', useRTH=True)
     ib.disconnect()
     data = util.df(historical_data)
     data['datetime'] = pd.to_datetime(data['date'])
@@ -500,9 +500,14 @@ class DataExporter(bt.Analyzer):
             df[key] = value
         return df
 
+
+
+data = get_historical_data()
+print('Successfully retrieved historical data')
+
 # Setup the cerebro engine
 cerebro = bt.Cerebro()
-cerebro.adddata(bt.feeds.PandasData(dataname=get_historical_data()))
+cerebro.adddata(bt.feeds.PandasData(dataname=data))
 cerebro.addstrategy(MyStrategy)
 #cerebro.addanalyzer(DataExporter, _name='data_exporter')
 

@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, Optional, TypeVar, Generic, List, Any
 
@@ -32,37 +32,41 @@ class AbstractDataStore(ABC, Generic[T]):
         pass
 
 
-# Implementation of in-memory data store using dataclass
+# Base class for Data Store (responsible for actual storage)
 @dataclass
-class InMemoryDataStore(AbstractDataStore[Any]):
-    data: Dict[str, Any] = field(default_factory=dict)
+class BaseDataStore(AbstractDataStore[Any]):
+#    def __init__(self) -> None:
+#        super().__init__()
+#        self._data: Dict[str, Any] = {}
+    _data: Dict[str, Any] = field(default_factory=dict)
 
     def get(self, key: str) -> Optional[Any]:
-        return self.data.get(key)
+        return self._data.get(key)
 
     def create(self, key: str, value: Any) -> None:
-        self.data[key] = value
+        self._data[key] = value
 
     def read(self) -> Dict[str, Any]:
-        return self.data
+        return self._data
 
     def update(self, key: str, value: Any) -> None:
-        self.data[key] = value
+        self._data[key] = value
 
     def delete(self, key: str) -> None:
-        if key in self.data:
-            del self.data[key]
+        if key in self._data:
+            del self._data[key]
         else:
             raise KeyError(f"Key '{key}' not found in data store.")
         
-    def __getstate__(self) -> object:
-        return {'data': self.data}
+#    def __getstate__(self) -> object:
+#        state = self.__dict__.copy()
+#        return state
     
-    def __setstate__(self, state: object) -> None:
-        self.data = state['data']
+#    def __setstate__(self, state: dict) -> None:
+#        self.__dict__.update(state)
         
 
-class ArrayStore(InMemoryDataStore):
+class ArrayStore(BaseDataStore):
     def __init__(self):
         super().__init__()
         self.__i: int = 0
@@ -137,3 +141,28 @@ class ArrayStore(InMemoryDataStore):
                 break
 
     
+if __name__ == "__main__":
+    import pickle
+
+    # Instantiate the data store
+    store = BaseDataStore()
+
+    # Perform some CRUD operations
+    store.create("item1", {"name": "Item One", "price": 100})
+    store.create("item2", {"name": "Item Two", "price": 200})
+
+    print(store.read())  # Read all items
+
+    store.update("item1", {"name": "Updated Item One", "price": 150})
+    print(store.get("item1"))  # Read specific item
+
+    store.delete("item2")
+
+    print(store.read())  # Read remaining items
+
+    # Pickle the store
+    pickled_store = pickle.dumps(store)
+
+    # Unpickle the store
+    unpickled_store = pickle.loads(pickled_store)
+    print(store.read())  # Read all items
