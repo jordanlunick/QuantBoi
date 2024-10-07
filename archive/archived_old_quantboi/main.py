@@ -1,4 +1,4 @@
-from archive_quantboi.data import (BaseDataRepository, BaseDataStore)
+from archived_old_quantboi.data import (BaseDataRepository, BaseDataStore)
 
 import pickle
 

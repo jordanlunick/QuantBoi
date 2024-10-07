@@ -10,14 +10,14 @@ except ImportError:
 
 # Should always be successful
 try:
-    import archive_quantboi.config
+    import archived_old_quantboi.config
     print('Import was successful!')
 except ImportError:
     print('Import failed!')
 
 # Does not seem to work well with relative imports
 try:
-    from ..quantboi import config
+    from ..archived_old_quantboi import config
     print('Import was successful!')
 except ImportError:
     print('Import failed!')
